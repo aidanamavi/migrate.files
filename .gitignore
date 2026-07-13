@@ -2,3 +2,4 @@ Apple Music
 *.env
 *.ini
 *.log
+*.code-workspace
