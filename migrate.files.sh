@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ==============================================================================
-# MP3 File Migrator
+# Simple File Migrator
 #
 # A bash script to find and move audio files from a source to a destination folder.
 # It is designed to be interactive, safe, and configurable via a `.env` file.
@@ -114,21 +114,21 @@ draw_progress_bar() { # Only called when interactive
 # In interactive mode, the user is prompted.
 if [ "$SkipPrompts" == "true" ] && [ "$LogOnSkipPrompts" == "true" ]; then
     # Automation mode with logging enabled: no prompts, create log file.
-    LOG_FILE="$SCRIPT_DIR/mp3_move_log_$(date +%Y%m%d-%H%M%S).log"
+    LOG_FILE="$SCRIPT_DIR/file_migrator_log_$(date +%Y%m%d-%H%M%S).log"
     INTERACTIVE=false
 elif $IS_TERMINAL && [ "$SkipPrompts" != "true" ]; then
     # Interactive mode: ask the user if they want to log.
     printf '\e[8;30;100t' # Resize terminal
     read -p "Do you want to save a log of this session? (y/n) " save_log_response
     if [[ "$save_log_response" =~ ^[Yy]$ ]]; then
-        LOG_FILE="$SCRIPT_DIR/mp3_move_log_$(date +%Y%m%d-%H%M%S).log"
+        LOG_FILE="$SCRIPT_DIR/file_migrator_log_$(date +%Y%m%d-%H%M%S).log"
         INTERACTIVE=false
     fi
     echo
 fi
 
 # --- Initial Setup and Validation ---
-log_message "${CYAN}Starting MP3 file migration process...${NC}"
+log_message "${CYAN}Starting Simple File Migrator...${NC}"
 if [ -n "$LOG_FILE" ]; then
     log_message "[INFO] Logging this session to: '$LOG_FILE'"
 fi

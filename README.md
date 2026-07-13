@@ -1,15 +1,15 @@
-# MP3 File Migrator
+# Simple File Migrator
 
-A user-friendly bash script to find and move audio files from a source folder to a destination, designed to be interactive, safe, and configurable.
+A user-friendly bash script to find and move files from a source folder to a destination, designed to be interactive, safe, and configurable.
 
 ## Features
 
-*   **Interactive & Safe**: Lists all MP3 files it finds and asks for your confirmation before moving anything. You always have the final say.
+*   **Interactive & Safe**: Lists all matching files it finds and asks for your confirmation before moving anything. You always have the final say.
 *   **Flexible Configuration**: Easily set source/destination paths, file types, and automation settings in a standard `.env` file.
 *   **Dry Run Mode**: A `DryRun` setting in the `.env` file allows you to run a simulation to see which files would be moved without making any actual changes.
 *   **Live Log Output**: Displays a clean, color-coded log of its actions in the terminal, including `[INFO]`, `[SUCCESS]`, `[WARN]`, and `[ERROR]` prefixes.
 *   **Detailed Progress Bar**: Shows a detailed, real-time progress bar during file transfers when running interactively.
-*   **Optional File Logging**: At startup, it prompts you to save a detailed, timestamped log file (e.g., `mp3_move_log_20260711-160000.log`) of the entire operation. The log file is cleanly formatted without any color codes.
+*   **Optional File Logging**: At startup, it prompts you to save a detailed, timestamped log file (e.g., `file_migrator_log_20260711-160000.log`) of the entire operation. The log file is cleanly formatted without any color codes.
 *   **Automation-Friendly**: A `SkipPrompts` option in the `.env` file allows the script to run non-interactively, making it perfect for scheduled tasks.
 *   **Automatic Folder Creation**: If the destination folder doesn't exist, the script will offer to create it for you, preventing errors.
 *   **Smart Error Handling**:
@@ -41,13 +41,13 @@ Next, open the `.env` file and edit the variables to match your setup.
 ### 2. Make the Script Executable
 You only need to do this once. This command gives your system permission to run the file as a script.
 ```bash
-chmod +x move_mp3s.sh
+chmod +x migrate.files.sh
 ```
 
 ### 3. Run the Script
 Execute the script from your terminal.
 ```bash
-./move_mp3s.sh
+./migrate.files.sh
 ```
 The script will guide you the rest of the way!
 
