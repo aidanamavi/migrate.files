@@ -154,12 +154,20 @@ for ext in $FileTypesToMove; do
     find_args+=(-iname "*.$ext")
 done
 
-# Find all specified files in the source directory (non-recursively)
-readarray -d '' filesToMove < <(find "$SourceFolder" -maxdepth 1 -type f \( "${find_args[@]}" \) -print0)
+find_command_base=(find "$SourceFolder")
+if [ "$RecursiveSearch" != "true" ]; then
+    log_message "[INFO] Recursive search is disabled. Searching top-level directory only."
+    find_command_base+=(-maxdepth 1)
+else
+    log_message "[INFO] Recursive search is enabled. Searching all subdirectories."
+fi
+
+# Find all specified files in the source directory
+readarray -d '' filesToMove < <( "${find_command_base[@]}" -type f \( "${find_args[@]}" \) -print0)
 
 if [ ${#filesToMove[@]} -gt 0 ]; then
     failedMoves=0
-    fileCount=${#filesToMove[@]}
+    fileCount=${#filesToMove[@]} # This is a count of files found
     log_message "${GREEN}[INFO] Found $fileCount file(s) to move:${NC}"
     for file in "${filesToMove[@]}"; do
         echo -e "  - $(basename "$file")"
@@ -226,19 +234,28 @@ if [ ${#filesToMove[@]} -gt 0 ]; then
         log_message "${YELLOW}Operation cancelled by the user. No files were moved.${NC}"
     fi
 else
-    # If no MP3s are found, check for other common audio files to provide a better hint.
-    otherAudioFiles=$(find "$SourceFolder" -maxdepth 1 -type f \( -iname "*.m4a" -o -iname "*.flac" -o -iname "*.wav" -o -iname "*.aac" \))
-    
     log_message "${YELLOW}[INFO] No files with the specified extensions were found.${NC}"
-    
-    if [ -n "$otherAudioFiles" ]; then
-        log_message "${CYAN}However, I did find other audio file types (like M4A, FLAC, WAV, etc.).${NC}"
-        log_message "${CYAN}You can change the 'FileTypesToMove' variable in your .env file to include them.${NC}"
-        read -p "Would you like to modify the script to include other file types? (y/n) " response
-        if [[ "$response" =~ ^[Yy]$ ]]; then
-            log_message "${GREEN}Great! You can edit the script to look for other extensions. For example, to find both .mp3 and .m4a files, you could change the 'find' command.${NC}"
-        else
-            log_message "${YELLOW}No action taken. The script will now exit.${NC}"
+
+    # --- Smart Suggestion Feature ---
+    # Check for other common audio files to provide a better hint.
+    if [ "$SkipPrompts" != "true" ]; then
+        echo "" # Formatting
+        log_message "[INFO] Checking for other audio file types you might want to move..."
+        other_audio_types=()
+        while IFS= read -r line; do
+            other_audio_types+=("$line")
+        done < <( "${find_command_base[@]}" -type f \( -iname "*.m4a" -o -iname "*.flac" -o -iname "*.wav" -o -iname "*.aac" \) -printf "%f\n" | sed 's/.*\.//' | tr '[:upper:]' '[:lower:]' | sort -u )
+
+        if [ ${#other_audio_types[@]} -gt 0 ]; then
+            log_message "${CYAN}I found files with these extensions: ${other_audio_types[*]}.${NC}"
+            read -p "Would you like to search again using these file types? (y/n) " response
+            if [[ "$response" =~ ^[Yy]$ ]]; then
+                export FileTypesToMove="${other_audio_types[*]}" # Temporarily override for this run
+                log_message "${GREEN}Great! Restarting the search for the new file types...${NC}"
+                echo ""
+                # Re-execute the script with the new context
+                exec bash "$0" "$@"
+            fi
         fi
     fi
 fi
