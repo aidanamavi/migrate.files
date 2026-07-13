@@ -139,6 +139,11 @@ if [ ! -d "$DestinationFolder" ]; then
     fi
 fi
 
+if [ "$DryRun" == "true" ]; then
+    log_message "${YELLOW}[WARN] DRY RUN MODE IS ENABLED. No files will be moved.${NC}"
+    echo ""
+fi
+
 log_message "[INFO] Searching for files with extensions: $FileTypesToMove..."
 # Build find command arguments for specified file types
 find_args=()
@@ -170,32 +175,48 @@ if [ ${#filesToMove[@]} -gt 0 ]; then
     echo
     if [[ "$confirm" =~ ^[Yy]$ ]]; then
         log_message "[INFO] Starting file move operation..."
+
+        if [ "$DryRun" == "true" ]; then
+            # In dry run, check if we can write to the destination folder.
+            if ! [ -w "$DestinationFolder" ]; then
+                log_message "${RED}[DRY RUN] [ERROR] Destination folder '$DestinationFolder' is not writable. Please check permissions.${NC}"
+                exit 1
+            fi
+        fi
+
         processed_count=0
         for file in "${filesToMove[@]}"; do
             ((processed_count++))
             fileName=$(basename "$file")
-            if $INTERACTIVE; then
-                draw_progress_bar $processed_count $fileCount "$fileName"
-            fi
-            
-            # Capture error message from mv
-            error_message=$(mv "$file" "$DestinationFolder" 2>&1)
-            if [ $? -ne 0 ]; then
-                # On failure, log the error
-                if $INTERACTIVE; then echo ""; fi # Move off the progress bar line
-                log_message "${RED}[ERROR] Failed to move '$fileName'. Reason: $error_message${NC}"
-                ((failedMoves++))
-            elif [ -z "$LOG_FILE" ]; then
-                : # Don't log success for every file unless we are writing to a log
+
+            if [ "$DryRun" == "true" ]; then
+                log_message "[DRY RUN] Would move '$fileName' to '$DestinationFolder'"
             else
-                log_message "[INFO] Moved ($processed_count/$fileCount): $fileName"
+                if $INTERACTIVE; then
+                    draw_progress_bar $processed_count $fileCount "$fileName"
+                fi
+                
+                # Capture error message from mv
+                error_message=$(mv "$file" "$DestinationFolder" 2>&1)
+                if [ $? -ne 0 ]; then
+                    # On failure, log the error
+                    if $INTERACTIVE; then echo ""; fi # Move off the progress bar line
+                    log_message "${RED}[ERROR] Failed to move '$fileName'. Reason: $error_message${NC}"
+                    ((failedMoves++))
+                elif [ -z "$LOG_FILE" ]; then
+                    : # Don't log success for every file unless we are writing to a log
+                else
+                    log_message "[INFO] Moved ($processed_count/$fileCount): $fileName"
+                fi
             fi
         done
         if $INTERACTIVE; then echo ""; fi # Final newline after progress bar
         echo "" # Blank line for separation
         log_message "[INFO] Migration process complete."
-        if [ $failedMoves -eq 0 ]; then
-            log_message "${GREEN}[SUCCESS] All $fileCount MP3 file(s) have been successfully moved.${NC}"
+        if [ "$DryRun" == "true" ]; then
+            log_message "${GREEN}[DRY RUN] Successfully simulated moving $fileCount file(s).${NC}"
+        elif [ $failedMoves -eq 0 ]; then
+            log_message "${GREEN}[SUCCESS] All $fileCount file(s) have been successfully moved.${NC}"
         else
             successMoves=$((fileCount - failedMoves))
             log_message "${YELLOW}$successMoves of $fileCount files were moved successfully.${NC}"
