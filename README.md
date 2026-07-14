@@ -7,6 +7,7 @@ A user-friendly bash script to find and move files from a source folder to a des
 *   **Interactive & Safe**: Lists all matching files it finds and asks for your confirmation before moving anything. You always have the final say.
 *   **Flexible Configuration**: Easily set source/destination paths, file types, and automation settings in a standard `.env` file.
 *   **Dry Run Mode**: A `DryRun` setting in the `.env` file allows you to run a simulation to see which files would be moved without making any actual changes.
+*   **Verified Transfers**: After moving a file, the script automatically verifies its presence in the destination, guaranteeing that the transfer was successful.
 *   **Live Log Output**: Displays a clean, color-coded log of its actions in the terminal, including `[INFO]`, `[SUCCESS]`, `[WARN]`, and `[ERROR]` prefixes.
 *   **Detailed Progress Bar**: Shows a detailed, real-time progress bar during file transfers when running interactively.
 *   **Optional File Logging**: At startup, it prompts you to save a detailed, timestamped log file (e.g., `file_migrator_log_20260711-160000.log`) of the entire operation. The log file is cleanly formatted without any color codes.

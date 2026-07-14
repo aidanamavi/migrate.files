@@ -241,15 +241,21 @@ if [ ${#filesToMove[@]} -gt 0 ]; then
                 
                 # Execute the move command and capture any error output.
                 error_message=$(mv "$file" "$DestinationFolder" 2>&1)
-                if [ $? -ne 0 ]; then
+                move_exit_code=$?
+
+                if [ $move_exit_code -ne 0 ]; then
                     # On failure, log the error
                     if $INTERACTIVE; then echo ""; fi # Move off the progress bar line
                     log_message "${RED}[ERROR] Failed to move '$fileName'. Reason: $error_message${NC}"
                     ((failedMoves++))
-                elif [ -z "$LOG_FILE" ]; then
-                    # If not logging to a file, don't print success for every single file to keep the console clean.
-                    : # Don't log success for every file unless we are writing to a log
+                elif [ ! -f "$DestinationFolder/$fileName" ]; then
+                    # Post-move verification: Check if the file exists in the destination.
+                    if $INTERACTIVE; then echo ""; fi # Move off the progress bar line
+                    log_message "${RED}[ERROR] Verification failed for '$fileName'. File not found in destination after move.${NC}"
+                    ((failedMoves++))
                 else
+                    # Success: The move command succeeded and the file exists in the destination.
+                    # Only log individual successes if writing to a log file to keep the terminal clean.
                     log_message "[INFO] Moved ($processed_count/$fileCount): $fileName"
                 fi
             fi
