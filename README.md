@@ -68,6 +68,16 @@ The script will guide you the rest of the way!
 
 > **Tip:** For your first run, it's a great idea to set `DryRun=true` in your `.env` file. This lets you safely preview all the actions the script will take.
 
+## Roadmap
+
+Here are some of the features and improvements planned for future releases:
+
+*   **File Conflict Resolution**: Add options to handle cases where a file with the same name already exists in the destination (e.g., overwrite, skip, or rename).
+*   **Enhanced Configuration Validation**: Implement stricter checks for the `.env` file to catch common errors, like invalid paths or misconfigured options, before the script runs.
+*   **Performance Optimizations**: Investigate using tools like `xargs` for bulk file operations to improve performance when moving a very large number of files.
+*   **Cross-Platform Compatibility**: Improve support for other operating systems, such as macOS, by replacing GNU-specific commands (like `readlink -f`) with more portable alternatives.
+
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
